@@ -1,0 +1,51 @@
+stages:
+  - deploy
+
+# SSH Setup
+.before_script_stage:
+  before_script:
+    - apt-get update -y && apt-get install -y openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$STAGE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H "$STAGE_SSH_HOST" >> ~/.ssh/known_hosts
+
+
+.before_script_production:
+   before_script:
+     - apt-get update -y && apt-get install -y openssh-client
+     - mkdir -p ~/.ssh
+     - echo "$PROD_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+     - chmod 600 ~/.ssh/id_rsa
+     - ssh-keyscan -H "$PROD_SSH_HOST" >> ~/.ssh/known_hosts
+
+# STAGING DEPLOYMENT
+deploy_stage:
+  stage: deploy
+  extends: .before_script_stage
+  script:
+    - echo "Deploying to Staging..."
+    - ssh "$STAGE_SSH_USER@$STAGE_SSH_HOST" "
+        cd $STAGE_DEPLOY_PATH &&
+        git fetch origin stage &&
+        git reset --hard origin/stage &&   
+        npm install &&
+        pm2 restart ecosystem.config.cjs --env staging
+      "
+  only:
+    - stage
+
+ # PRODUCTION DEPLOYMENT
+deploy_production:
+   stage: deploy
+   extends: .before_script_production
+   script:
+     - echo "Deploying to Production..."
+     - ssh "$PROD_SSH_USER@$PROD_SSH_HOST" "
+         cd $PROD_DEPLOY_PATH &&
+         git pull origin production &&
+         npm install &&
+         pm2 restart ecosystem.config.cjs --env production
+       "
+   only:
+     - production
