@@ -148,6 +148,9 @@ const createProduct = async (req, res) => {
         tourOrder = 0,
         urlName,
         googleAnalyticsId = "",
+        bhkType = "",
+        hasVoiceOver = false,
+        viewMode = "Day",
       } = req.body;
 
       if (
@@ -197,6 +200,9 @@ const createProduct = async (req, res) => {
         tourOrder: parseInt(tourOrder),
         urlName,
         googleAnalyticsId,
+        bhkType,
+        hasVoiceOver: hasVoiceOver === "true" || hasVoiceOver === true,
+        viewMode,
         thumbImage: req.file ? `/uploads/products/${req.file.filename}` : "",
       });
 
@@ -229,6 +235,9 @@ const updateProduct = async (req, res) => {
 
       const { id } = req.params; // Get the product ID from the URL params
       const updateData = req.body; // Get the updated data from the request body
+      if (updateData.hasVoiceOver !== undefined) {
+        updateData.hasVoiceOver = updateData.hasVoiceOver === "true" || updateData.hasVoiceOver === true;
+      }
 
       // Find the product by ID
       const product = await Product.findById(id);
