@@ -31,6 +31,7 @@ import EnquiryRoute from "./routes/adminPanelRoutes/enquiryRoutes.js";
 import { handleRedirect } from "./controllers/redirectURLController.js"; // Import the redirect handler
 import uploadRoutes from './routes/adminPanelRoutes/uploadRoutes.js';
 import AllowedDomainRoute from "./routes/adminPanelRoutes/allowedDomainRoutes.js";
+import BlogRoute from "./routes/adminPanelRoutes/blogRoutes.js";
 import {
   verifyTourAccessToken,
   TOUR_ACCESS_COOKIE_NAME,
@@ -1016,6 +1017,7 @@ app.use("/admin/area", AreaRoute);
 app.use("/admin", EmailSettingRoute);
 app.use("/admin/enquiries", EnquiryRoute);
 app.use("/admin/allowed-domains", AllowedDomainRoute);
+app.use("/admin/blogs", BlogRoute);
 
 // This should be last to catch any remaining admin routes
 app.use("/admin", ImageRoute);
