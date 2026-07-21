@@ -21,6 +21,10 @@ const ClientAccessSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    allAccess: {
+      type: Boolean,
+      default: true, // if true, client sees every tour, ignoring assignedTours
+    },
     expiresAt: {
       type: Date,
       default: null, // null = no expiry

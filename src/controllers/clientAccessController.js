@@ -35,7 +35,7 @@ export const getClientAccessById = async (req, res) => {
 // ADMIN: create client access
 export const createClientAccess = async (req, res) => {
   try {
-    const { clientName, slug, assignedTours = [], expiresAt = null, isActive = true, notes = "" } = req.body;
+    const { clientName, slug, assignedTours = [], allAccess = true, expiresAt = null, isActive = true, notes = "" } = req.body;
 
     if (!clientName) {
       return res.status(400).json({ success: false, message: "Client name is required" });
@@ -52,6 +52,7 @@ export const createClientAccess = async (req, res) => {
       clientName,
       slug: finalSlug,
       assignedTours,
+      allAccess,
       expiresAt: expiresAt || null,
       isActive,
       notes,
@@ -67,11 +68,12 @@ export const createClientAccess = async (req, res) => {
 // ADMIN: update client access
 export const updateClientAccess = async (req, res) => {
   try {
-    const { clientName, slug, assignedTours, expiresAt, isActive, notes } = req.body;
+    const { clientName, slug, assignedTours, allAccess, expiresAt, isActive, notes } = req.body;
 
     const updateData = {};
     if (clientName !== undefined) updateData.clientName = clientName;
     if (assignedTours !== undefined) updateData.assignedTours = assignedTours;
+    if (allAccess !== undefined) updateData.allAccess = allAccess;
     if (expiresAt !== undefined) updateData.expiresAt = expiresAt || null;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (notes !== undefined) updateData.notes = notes;
@@ -130,10 +132,19 @@ export const getClientAccessBySlug = async (req, res) => {
       return res.status(403).json({ success: false, message: "This link has expired" });
     }
 
+    let tours = client.assignedTours;
+
+    if (client.allAccess) {
+      const Product = (await import("../models/productModel.js")).default;
+      tours = await Product.find({ categoryType: "Virtual Tour", productStatus: "Yes" }).select(
+        "tourName tourURL thumbImage urlName area"
+      );
+    }
+
     res.status(200).json({
       success: true,
       clientName: client.clientName,
-      tours: client.assignedTours,
+      tours,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error validating access link", error: error.message });
