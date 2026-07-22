@@ -300,7 +300,7 @@ export const buildSecurityConfig = (domains = [], includeLocalHosts = false) => 
     frameAncestorsDirective,
     allowedOriginsSet,
     allowedOrigins: Array.from(allowedOriginsSet),
-    xFrameOptionsValue: "ALLOWALL",
+    xFrameOptionsValue: "",
   };
 };
 

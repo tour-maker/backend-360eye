@@ -143,7 +143,7 @@ const applySecurityHeaders = (req, res, config) => {
   res.header("Access-Control-Allow-Methods", ALLOWED_METHODS);
   res.header("Access-Control-Allow-Credentials", "true");
   res.setHeader("Content-Security-Policy", config.frameAncestorsDirective);
-  res.setHeader("X-Frame-Options", config.xFrameOptionsValue);
+  if (config.xFrameOptionsValue) res.setHeader("X-Frame-Options", config.xFrameOptionsValue);
 };
 
 const securityConfigMiddleware = (req, res, next) => {
@@ -662,7 +662,7 @@ ${analyticsSnippet}
       res.status(200)
         .setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-      res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
+      if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.send(authHtml);
       return;
@@ -733,7 +733,7 @@ ${analyticsSnippet}
       res.status(200);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Security-Policy', frameAncestorsDirective);
-      res.setHeader('X-Frame-Options', xFrameOptionsValue);
+      if (xFrameOptionsValue) res.setHeader("X-Frame-Options", xFrameOptionsValue);
       res.setHeader('Access-Control-Allow-Origin', '*');
 
       if (isCrawler) {
@@ -838,7 +838,7 @@ ${analyticsSnippet}
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-    res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
+    if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
 
     response.data.pipe(res);
     return;
@@ -901,7 +901,7 @@ app.use('/gallery/*', (req, res, next) => {
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-  res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
+  if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
   res.status(403).send('Access to this resource is restricted.');
 });
 
