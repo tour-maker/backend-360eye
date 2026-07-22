@@ -78,6 +78,20 @@ const ProductSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    bhkType: {
+      type: String,
+      enum: ["", "2 BHK", "3 BHK", "5 BHK"],
+      default: "",
+    },
+    hasVoiceOver: {
+      type: Boolean,
+      default: false,
+    },
+    viewMode: {
+      type: String,
+      enum: ["Day", "Night", "Both"],
+      default: "Day",
+    },
   },
   { timestamps: true, collection: "products" }
 );
