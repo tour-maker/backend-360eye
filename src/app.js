@@ -48,6 +48,7 @@ import {
 dotenv.config({ path: "./.env" });
 
 const app = express();
+app.use(cookieParser());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -292,8 +293,8 @@ const serveCDNFile = async (req, res, cdnPath) => {
     : `${baseUrl}${basePath}`;
 
   const cdnUrl = sanitizedQueryString
-    ? `${CDN_BASE_URL}/${cdnPath}?${sanitizedQueryString}`
-    : `${CDN_BASE_URL}/${cdnPath}`;
+    ? `${baseUrl}/${cdnPath}?${sanitizedQueryString}`
+    : `${baseUrl}/${cdnPath}`;
 
   const securityConfig = resolveSecurityConfig(req);
   console.log(`[GALLERY ROUTE] Calling serveCDNFile with: ${cdnPath}`);
@@ -671,6 +672,11 @@ ${analyticsSnippet}
 
   try {
     const isHtmlRequest = cdnPath.endsWith('.html') || cdnPath.endsWith('.htm');
+    const localFilePath = path.resolve(PROJECT_ROOT, 'public', cdnPath.split('?')[0]);
+    if (fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile()) {
+      applySecurityHeaders(req, res, securityConfig);
+      return res.sendFile(localFilePath);
+    }
 
     const embeddedHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -999,7 +1005,6 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(cookieParser());
 
 // Routes
 app.use("/products", websiteProducts);
