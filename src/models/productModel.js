@@ -79,9 +79,9 @@ const ProductSchema = new mongoose.Schema(
       trim: true,
     },
     bhkType: {
-      type: String,
-      enum: ["", "2 BHK", "3 BHK", "5 BHK"],
-      default: "",
+      type: [String],
+      enum: ["2 BHK", "3 BHK", "3.5 BHK", "4 BHK", "5 BHK"],
+      default: [],
     },
     hasVoiceOver: {
       type: Boolean,

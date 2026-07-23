@@ -148,7 +148,7 @@ const createProduct = async (req, res) => {
         tourOrder = 0,
         urlName,
         googleAnalyticsId = "",
-        bhkType = "",
+        bhkType: bhkTypeRaw,
         hasVoiceOver = false,
         viewMode = "Day",
       } = req.body;
@@ -184,6 +184,14 @@ const createProduct = async (req, res) => {
           success: false,
           message: "Invalid product status. Must be 'Yes' or 'No'",
         });
+      }
+
+      let bhkType = [];
+      try {
+        const parsed = typeof bhkTypeRaw === "string" ? JSON.parse(bhkTypeRaw) : bhkTypeRaw;
+        bhkType = Array.isArray(parsed) ? parsed.filter(Boolean) : (parsed ? [parsed] : []);
+      } catch {
+        bhkType = bhkTypeRaw ? [bhkTypeRaw] : [];
       }
 
       const newProduct = new Product({
@@ -237,6 +245,15 @@ const updateProduct = async (req, res) => {
       const updateData = req.body; // Get the updated data from the request body
       if (updateData.hasVoiceOver !== undefined) {
         updateData.hasVoiceOver = updateData.hasVoiceOver === "true" || updateData.hasVoiceOver === true;
+      }
+
+      if (updateData.bhkType !== undefined) {
+        try {
+          const parsed = typeof updateData.bhkType === "string" ? JSON.parse(updateData.bhkType) : updateData.bhkType;
+          updateData.bhkType = Array.isArray(parsed) ? parsed.filter(Boolean) : (parsed ? [parsed] : []);
+        } catch {
+          updateData.bhkType = updateData.bhkType ? [updateData.bhkType] : [];
+        }
       }
 
       // Find the product by ID
