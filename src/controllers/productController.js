@@ -149,6 +149,7 @@ const createProduct = async (req, res) => {
         urlName,
         googleAnalyticsId = "",
         bhkType: bhkTypeRaw,
+        plotStatus = "",
         hasVoiceOver = false,
         viewMode = "Day",
       } = req.body;
@@ -209,6 +210,7 @@ const createProduct = async (req, res) => {
         urlName,
         googleAnalyticsId,
         bhkType,
+        plotStatus,
         hasVoiceOver: hasVoiceOver === "true" || hasVoiceOver === true,
         viewMode,
         thumbImage: req.file ? `/uploads/products/${req.file.filename}` : "",

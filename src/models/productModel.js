@@ -83,6 +83,11 @@ const ProductSchema = new mongoose.Schema(
       enum: ["2 BHK", "3 BHK", "3.5 BHK", "4 BHK", "5 BHK"],
       default: [],
     },
+    plotStatus: {
+      type: String,
+      enum: ["", "Available", "Reserved", "Sold"],
+      default: "",
+    },
     hasVoiceOver: {
       type: Boolean,
       default: false,
