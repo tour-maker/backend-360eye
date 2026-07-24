@@ -11,7 +11,7 @@ import protect from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllSliders);
+router.get("/", protect, getAllSliders);
 router.post("/", protect, addSlider);
 router.get("/:id", protect, getSlider);
 router.put("/:id",protect, updateSlider);
