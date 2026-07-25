@@ -55,6 +55,7 @@ const mapDomainResponse = (doc) => {
     contactEmail: plain.contactEmail || "",
     contactPhone: plain.contactPhone || "",
     ownerEmails: Array.isArray(plain.ownerEmails) ? plain.ownerEmails : [],
+    allowedTourIds: Array.isArray(plain.allowedTourIds) ? plain.allowedTourIds.map(id => id?.toString?.() || id) : [],
     expiryDate: plain.expiryDate || null,
     remindBeforeDays:
       typeof plain.remindBeforeDays === "number" ? plain.remindBeforeDays : DEFAULT_REMINDER_DAYS,
@@ -141,6 +142,9 @@ const applyMutableFields = (domain, body, allowIdentifierChanges) => {
 
   if (body.contactEmail !== undefined) {
     domain.contactEmail = body.contactEmail ? String(body.contactEmail).trim() : "";
+  }
+  if (body.allowedTourIds !== undefined) {
+    domain.allowedTourIds = Array.isArray(body.allowedTourIds) ? body.allowedTourIds.filter(Boolean) : [];
   }
 
   if (body.contactPhone !== undefined) {
@@ -267,6 +271,7 @@ export const createAllowedDomain = async (req, res) => {
       notes: req.body.notes ? String(req.body.notes).trim() : "",
       isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
       isSystemDomain: false,
+      allowedTourIds: Array.isArray(req.body.allowedTourIds) ? req.body.allowedTourIds.filter(Boolean) : [],
     });
 
     invalidateAllowedDomainCache();
