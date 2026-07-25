@@ -55,6 +55,11 @@ const AllowedDomainSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    allowedTourIds: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Product",
+      default: [],
+    },
     isSystemDomain: {
       type: Boolean,
       default: false,

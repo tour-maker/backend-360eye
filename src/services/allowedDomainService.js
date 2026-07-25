@@ -220,6 +220,7 @@ export const getActiveAllowedDomains = async () => {
         ownerEmails: normalizeOwnerEmails(doc.ownerEmails),
         lastReminderSentAt: doc.lastReminderSentAt ? new Date(doc.lastReminderSentAt) : null,
         isSystemDomain: Boolean(doc.isSystemDomain),
+        allowedTourIds: (doc.allowedTourIds || []).map((id) => id.toString()),
       };
     });
 
@@ -254,13 +255,20 @@ const registerOrigin = (originValue, frameAncestorSet, allowedOriginsSet) => {
   allowedOriginsSet.add(normalizedOrigin);
 };
 
-export const buildSecurityConfig = (domains = [], includeLocalHosts = false) => {
+export const buildSecurityConfig = (domains = [], includeLocalHosts = false, tourId = null) => {
   const frameAncestorSet = new Set();
   const allowedOriginsSet = new Set();
 
   domains.forEach((domain) => {
     if (!domain) {
       return;
+    }
+
+    if (tourId && !domain.isSystemDomain) {
+      const restrictedTourIds = (domain.allowedTourIds || []).map((id) => id.toString());
+      if (restrictedTourIds.length > 0 && !restrictedTourIds.includes(tourId.toString())) {
+        return;
+      }
     }
 
     if (domain.origin) {
@@ -304,9 +312,10 @@ export const buildSecurityConfig = (domains = [], includeLocalHosts = false) => 
   };
 };
 
-export const getSecurityConfigSnapshot = async (includeLocalHosts = false) => {
+export const getSecurityConfigSnapshot = async (includeLocalHosts = false, tourId = null) => {
   const now = Date.now();
   if (
+    !tourId &&
     securityConfigCache &&
     securityConfigExpiresAt > now &&
     securityConfigCache.includeLocalHosts === includeLocalHosts
@@ -316,10 +325,12 @@ export const getSecurityConfigSnapshot = async (includeLocalHosts = false) => {
 
   const allowedDomains = await getActiveAllowedDomains();
   const domainsToUse = allowedDomains.length ? allowedDomains : DEFAULT_ALLOWED_DOMAINS;
-  const config = buildSecurityConfig(domainsToUse, includeLocalHosts);
+  const config = buildSecurityConfig(domainsToUse, includeLocalHosts, tourId);
 
-  securityConfigCache = { includeLocalHosts, config };
-  securityConfigExpiresAt = now + SECURITY_CONFIG_TTL_MS;
+  if (!tourId) {
+    securityConfigCache = { includeLocalHosts, config };
+    securityConfigExpiresAt = now + SECURITY_CONFIG_TTL_MS;
+  }
 
   return config;
 };

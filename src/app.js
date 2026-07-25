@@ -297,10 +297,6 @@ const serveCDNFile = async (req, res, cdnPath) => {
     ? `${baseUrl}/${cdnPath}?${sanitizedQueryString}`
     : `${baseUrl}/${cdnPath}`;
 
-  const securityConfig = resolveSecurityConfig(req);
-  console.log(`[GALLERY ROUTE] Calling serveCDNFile with: ${cdnPath}`);
-  console.log(`[SECURITY CONFIG] frameAncestorsDirective: ${securityConfig?.frameAncestorsDirective}`);
-  applySecurityHeaders(req, res, securityConfig);
 
   let metaTitle = '360EYE – 360° Virtual Tour';
   let metaDescription = '';
@@ -337,6 +333,13 @@ const serveCDNFile = async (req, res, cdnPath) => {
   } catch (dbError) {
     console.error('Error fetching tour metadata:', dbError.message);
   }
+  const matchedTourId = matchedTour ? (matchedTour._id || matchedTour.id) : null;
+  const securityConfig = matchedTourId
+    ? await getSecurityConfigSnapshot(IS_DEVELOPMENT, matchedTourId)
+    : resolveSecurityConfig(req);
+  console.log(`[GALLERY ROUTE] Calling serveCDNFile with: ${cdnPath}`);
+  console.log(`[SECURITY CONFIG] frameAncestorsDirective: ${securityConfig?.frameAncestorsDirective}`);
+  applySecurityHeaders(req, res, securityConfig);
 
 
   if (matchedTour) {
