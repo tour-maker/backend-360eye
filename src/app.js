@@ -19,6 +19,7 @@ import EmailSettingRoute from "./routes/adminPanelRoutes/emailSettingRoutes.js";
 import CategoryRoute from "../src/routes/adminPanelRoutes/categoryRoutes.js";
 import SliderRoute from "../src/routes/adminPanelRoutes/sliderRoutes.js";
 import FilterRoute from "../src/routes/adminPanelRoutes/filterRoutes.js";
+import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
 import PageRedirectRoute from "../src/routes/adminPanelRoutes/redirectURLRoutes.js";
 import authRoutes from "./routes/adminPanelRoutes/authRoutes.js";
 import PropertyTypeRoute from "./routes/adminPanelRoutes/propertyTypeRoutes.js";
@@ -1022,6 +1023,7 @@ app.use("/admin/seo", SEORoute);
 app.use("/admin/categories", CategoryRoute);
 app.use("/admin/sliders", SliderRoute);
 app.use("/admin/filters", FilterRoute);
+app.use("/admin/careers", CareerRoute);
 app.use("/admin/page-redirects", PageRedirectRoute); // Make sure this line exists and is correct
 app.use("/admin/propertyTypes", PropertyTypeRoute);
 app.use("/admin/propertyStatus", PropertyStatusRoute);
