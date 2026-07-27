@@ -21,6 +21,8 @@ import SliderRoute from "../src/routes/adminPanelRoutes/sliderRoutes.js";
 import PublicSliderRoute from "../src/routes/publicRoutes/publicSliderRoutes.js";
 import FilterRoute from "../src/routes/adminPanelRoutes/filterRoutes.js";
 import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
+import PartnerRoute from "../src/routes/adminPanelRoutes/partnerRoutes.js";
+import PublicPartnerRoute from "../src/routes/publicRoutes/publicPartnerRoutes.js";
 import PageRedirectRoute from "../src/routes/adminPanelRoutes/redirectURLRoutes.js";
 import authRoutes from "./routes/adminPanelRoutes/authRoutes.js";
 import PropertyTypeRoute from "./routes/adminPanelRoutes/propertyTypeRoutes.js";
@@ -1026,6 +1028,8 @@ app.use("/admin/sliders", SliderRoute);
 app.use("/public/sliders", PublicSliderRoute);
 app.use("/admin/filters", FilterRoute);
 app.use("/admin/careers", CareerRoute);
+app.use("/admin/partners", PartnerRoute);
+app.use("/public/partners", PublicPartnerRoute);
 app.use("/admin/page-redirects", PageRedirectRoute); // Make sure this line exists and is correct
 app.use("/admin/propertyTypes", PropertyTypeRoute);
 app.use("/admin/propertyStatus", PropertyStatusRoute);
