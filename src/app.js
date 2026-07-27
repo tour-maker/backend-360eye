@@ -18,6 +18,7 @@ import SEORoute from "../src/routes/adminPanelRoutes/seoRoutes.js";
 import EmailSettingRoute from "./routes/adminPanelRoutes/emailSettingRoutes.js";
 import CategoryRoute from "../src/routes/adminPanelRoutes/categoryRoutes.js";
 import SliderRoute from "../src/routes/adminPanelRoutes/sliderRoutes.js";
+import PublicSliderRoute from "../src/routes/publicRoutes/publicSliderRoutes.js";
 import FilterRoute from "../src/routes/adminPanelRoutes/filterRoutes.js";
 import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
 import PageRedirectRoute from "../src/routes/adminPanelRoutes/redirectURLRoutes.js";
@@ -1022,6 +1023,7 @@ app.use("/admin/360-products", ThreeSixtyProductRoute);
 app.use("/admin/seo", SEORoute);
 app.use("/admin/categories", CategoryRoute);
 app.use("/admin/sliders", SliderRoute);
+app.use("/public/sliders", PublicSliderRoute);
 app.use("/admin/filters", FilterRoute);
 app.use("/admin/careers", CareerRoute);
 app.use("/admin/page-redirects", PageRedirectRoute); // Make sure this line exists and is correct
