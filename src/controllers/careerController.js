@@ -127,7 +127,7 @@ export const getAllRoles = async (req, res) => {
 
 export const addRole = async (req, res) => {
   try {
-    const { title, description = "", isOpen = true, roleOrder = 0, questions } = req.body;
+    const { title, description = "", image = "", isOpen = true, roleOrder = 0, questions } = req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: "Role title is required" });
     }
@@ -142,6 +142,7 @@ export const addRole = async (req, res) => {
     const role = new CareerRole({
       title: title.trim(),
       description,
+      image,
       isOpen: isOpen === true || isOpen === "true",
       roleOrder: parseInt(roleOrder) || 0,
       ...(parsedQuestions !== undefined ? { questions: parsedQuestions } : {}),
@@ -156,13 +157,14 @@ export const addRole = async (req, res) => {
 export const updateRole = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, isOpen, roleOrder, questions } = req.body;
+    const { title, description, image, isOpen, roleOrder, questions } = req.body;
     const role = await CareerRole.findById(id);
     if (!role) {
       return res.status(404).json({ success: false, message: "Role not found" });
     }
     if (title !== undefined && title.trim()) role.title = title.trim();
     if (description !== undefined) role.description = description;
+    if (image !== undefined) role.image = image;
     if (isOpen !== undefined) role.isOpen = isOpen === true || isOpen === "true";
     if (roleOrder !== undefined) role.roleOrder = parseInt(roleOrder) || 0;
     if (questions !== undefined) {
