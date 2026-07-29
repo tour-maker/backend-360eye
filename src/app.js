@@ -53,6 +53,10 @@ import {
 dotenv.config({ path: "./.env" });
 
 const app = express();
+app.use(cors({
+  origin: ["https://stageadminpanel.360eye.in", "https://stagewebsite.360eye.in", "http://localhost:3000", "http://localhost:5173"],
+  credentials: true,
+}));
 app.use(cookieParser());
 
 const __filename = fileURLToPath(import.meta.url);
@@ -777,6 +781,7 @@ ${analyticsSnippet}
         const htmlResponse = await axios.get(cdnUrl, {
           responseType: 'text',
           validateStatus: (status) => status < 500,
+          timeout: 8000,
         });
 
         if (htmlResponse.status === 200) {
