@@ -826,12 +826,12 @@ ${analyticsSnippet}
       }
     }
 
-    console.log(`[CDN REQUEST] Attempting to fetch: ${cdnUrl}`);
+    console.log(`[CDN REQUEST] Attempting to fetch: ${externalCdnUrl}`);
     
-    const response = await axios.get(cdnUrl, {
+    const response = await axios.get(externalCdnUrl, {
       responseType: 'stream',
       validateStatus: (status) => status < 500,
-      timeout: 30000, // 30 second timeout
+      timeout: 8000, // reduced from 30s
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
