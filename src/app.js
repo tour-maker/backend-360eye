@@ -301,6 +301,9 @@ const serveCDNFile = async (req, res, cdnPath) => {
     ? `${baseUrl}${basePath}?${sanitizedQueryString}`
     : `${baseUrl}${basePath}`;
 
+  let externalCdnUrl = `${CDN_BASE_URL}/${cdnPath}`;
+  const stagingCdnUrl = `https://dl8mwi3fl0yp4.cloudfront.net/${cdnPath}`;
+  const productionCdnUrl = `https://d2t6r6l6h3adka.cloudfront.net/${cdnPath}`;
   const cdnUrl = sanitizedQueryString
     ? `${baseUrl}/${cdnPath}?${sanitizedQueryString}`
     : `${baseUrl}/${cdnPath}`;
@@ -722,7 +725,7 @@ ${analyticsSnippet}
   <div class="tour-container">
     <iframe
       class="tour-frame"
-      src="${cdnUrl}"
+      src="${externalCdnUrl}"
       title="${metaTitle}"
       allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking"
       sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox"
@@ -778,21 +781,27 @@ ${analyticsSnippet}
 
     if (isHtmlRequest) {
       try {
-        const htmlResponse = await axios.get(cdnUrl, {
-          responseType: 'text',
-          validateStatus: (status) => status < 500,
-          timeout: 8000,
-        });
+        let found = false;
+        for (const candidate of [stagingCdnUrl, productionCdnUrl]) {
+          try {
+            const check = await axios.get(candidate, {
+              responseType: 'text', validateStatus: (s) => s < 500, timeout: 5000,
+            });
+            if (check.status === 200) {
+              externalCdnUrl = candidate;
+              found = true;
+              break;
+            }
+          } catch (e) {}
+        }
 
-        if (htmlResponse.status === 200) {
+        if (found) {
           sendEmbeddedHtml();
           return;
         }
 
-        if (htmlResponse.status === 404) {
-          res.status(404).send(`File not found: ${cdnPath}`);
-          return;
-        }
+        res.status(404).send(`File not found: ${cdnPath}`);
+        return;
 
         console.warn(`Unexpected CDN status ${htmlResponse.status} for ${cdnPath}. Serving embedded iframe.`);
         sendEmbeddedHtml();
