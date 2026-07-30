@@ -11,7 +11,7 @@ const signToken = (user) => {
       role: user.role  // Include role in the payload for better authorization
     },
     process.env.JWT_SECRET,
-    { expiresIn: Number(process.env.JWT_EXPIRES_IN) }
+    { expiresIn: process.env.JWT_EXPIRES_IN }
   );
 };
 
