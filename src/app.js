@@ -687,7 +687,7 @@ ${analyticsSnippet}
 
   try {
     const isHtmlRequest = cdnPath.endsWith('.html') || cdnPath.endsWith('.htm');
-    const localFilePath = path.resolve(PROJECT_ROOT, 'public', cdnPath.split('?')[0]);
+    const localFilePath = path.resolve(PROJECT_ROOT, 'public', decodeURIComponent(cdnPath.split('?')[0]));
     if (fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile()) {
       applySecurityHeaders(req, res, securityConfig);
       return res.sendFile(localFilePath);
