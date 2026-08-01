@@ -304,6 +304,24 @@ const serveCDNFile = async (req, res, cdnPath) => {
   let externalCdnUrl = `${CDN_BASE_URL}/${cdnPath}`;
   const stagingCdnUrl = `https://dl8mwi3fl0yp4.cloudfront.net/${cdnPath}`;
   const productionCdnUrl = `https://d2t6r6l6h3adka.cloudfront.net/${cdnPath}`;
+
+  let resolvedCandidate = null;
+  for (const preCandidate of [stagingCdnUrl, productionCdnUrl]) {
+    try {
+      const preCheck = await axios.get(preCandidate, {
+        responseType: 'text', validateStatus: (s) => s < 500, timeout: 5000,
+      });
+      const preBody = String(preCheck.data || '');
+      const preIsStub = preBody.includes('http-equiv="refresh"') || preBody.length < 1000;
+      if (preCheck.status === 200 && !preIsStub) {
+        resolvedCandidate = preCandidate;
+        break;
+      }
+    } catch (e) {}
+  }
+  if (resolvedCandidate) {
+    externalCdnUrl = resolvedCandidate;
+  }
   const cdnUrl = sanitizedQueryString
     ? `${baseUrl}/${cdnPath}?${sanitizedQueryString}`
     : `${baseUrl}/${cdnPath}`;
@@ -781,19 +799,7 @@ ${analyticsSnippet}
 
     if (isHtmlRequest) {
       try {
-        let found = false;
-        for (const candidate of [stagingCdnUrl, productionCdnUrl]) {
-          try {
-            const check = await axios.get(candidate, {
-              responseType: 'text', validateStatus: (s) => s < 500, timeout: 5000,
-            });
-            if (check.status === 200) {
-              externalCdnUrl = candidate;
-              found = true;
-              break;
-            }
-          } catch (e) {}
-        }
+        const found = !!resolvedCandidate;
 
         if (found) {
           sendEmbeddedHtml();
@@ -801,10 +807,6 @@ ${analyticsSnippet}
         }
 
         res.status(404).send(`File not found: ${cdnPath}`);
-        return;
-
-        console.warn(`Unexpected CDN status ${htmlResponse.status} for ${cdnPath}. Serving embedded iframe.`);
-        sendEmbeddedHtml();
         return;
       } catch (prefetchError) {
         if (!prefetchError.response) {
