@@ -546,10 +546,10 @@ ${analyticsSnippet}
       .overlay { padding: 28px 24px; }
       h1 { font-size: 1.6rem; }
     }
-    .tour-wrapper { position: fixed; inset: 0; background: #000; }
+    .tour-wrapper { position: fixed; inset: 0; background: #fff; }
     .tour-container { position: fixed; inset: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
     .tour-container.visible { opacity: 1; visibility: visible; }
-    .tour-frame { width: 100%; height: 100%; border: 0; display: block; background: #000; }
+    .tour-frame { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
   </style>
 </head>
 <body>
@@ -705,11 +705,6 @@ ${analyticsSnippet}
 
   try {
     const isHtmlRequest = cdnPath.endsWith('.html') || cdnPath.endsWith('.htm');
-    const localFilePath = path.resolve(PROJECT_ROOT, 'public', decodeURIComponent(cdnPath.split('?')[0]));
-    if (fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile()) {
-      applySecurityHeaders(req, res, securityConfig);
-      return res.sendFile(localFilePath);
-    }
 
     const embeddedHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -723,7 +718,7 @@ ${analyticsSnippet}
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #000;
+      background: #fff;
     }
     .tour-container {
       position: fixed;
