@@ -588,7 +588,7 @@ ${analyticsSnippet}
       id="tour-iframe"
       src=""
       title="${metaTitle}"
-      allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking"
+      allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking; camera; microphone"
       sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox"
     ></iframe>
   </div>
@@ -740,7 +740,7 @@ ${analyticsSnippet}
       class="tour-frame"
       src="${externalCdnUrl}"
       title="${metaTitle}"
-      allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking"
+      allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking; camera; microphone"
       sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox"
     ></iframe>
   </div>
