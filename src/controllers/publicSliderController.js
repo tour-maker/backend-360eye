@@ -1,6 +1,7 @@
 import Slider from "../models/sliderModel.js";
 
 export const getPublicSliders = async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
   try {
     const sliders = await Slider.find({ sliderStatus: "Yes" })
       .select("title sliderLink sliderOrder clientLogo sliderStatus")

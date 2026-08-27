@@ -1,4 +1,5 @@
 import express from "express";
+import PublicSliderRoute from "./routes/publicRoutes/publicSliderRoutes.js";
 import dotenv from "dotenv";
 
 import axios from "axios";
@@ -45,6 +46,7 @@ import {
 dotenv.config({ path: "./.env" });
 
 const app = express();
+app.use("/public/sliders", PublicSliderRoute);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
