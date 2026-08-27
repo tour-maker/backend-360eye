@@ -20,7 +20,7 @@ import CategoryRoute from "../src/routes/adminPanelRoutes/categoryRoutes.js";
 import SliderRoute from "../src/routes/adminPanelRoutes/sliderRoutes.js";
 import PublicSliderRoute from "../src/routes/publicRoutes/publicSliderRoutes.js";
 import FilterRoute from "../src/routes/adminPanelRoutes/filterRoutes.js";
-import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
+// import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
 import PartnerRoute from "../src/routes/adminPanelRoutes/partnerRoutes.js";
 import PublicPartnerRoute from "../src/routes/publicRoutes/publicPartnerRoutes.js";
 import PageRedirectRoute from "../src/routes/adminPanelRoutes/redirectURLRoutes.js";
@@ -36,7 +36,7 @@ import EnquiryRoute from "./routes/adminPanelRoutes/enquiryRoutes.js";
 import { handleRedirect } from "./controllers/redirectURLController.js"; // Import the redirect handler
 import uploadRoutes from './routes/adminPanelRoutes/uploadRoutes.js';
 import AllowedDomainRoute from "./routes/adminPanelRoutes/allowedDomainRoutes.js";
-import BlogRoute from "./routes/adminPanelRoutes/blogRoutes.js";
+// import BlogRoute from "./routes/adminPanelRoutes/blogRoutes.js";
 import ClientAccessRoute from "./routes/adminPanelRoutes/clientAccessRoutes.js";
 import ClientAccessPublicRoute from "./routes/websiteRoutes/clientAccessPublicRoutes.js";
 import {
@@ -1038,7 +1038,7 @@ app.use("/admin/categories", CategoryRoute);
 app.use("/admin/sliders", SliderRoute);
 app.use("/public/sliders", PublicSliderRoute);
 app.use("/admin/filters", FilterRoute);
-app.use("/admin/careers", CareerRoute);
+// app.use("/admin/careers", CareerRoute);
 app.use("/admin/partners", PartnerRoute);
 app.use("/public/partners", PublicPartnerRoute);
 app.use("/admin/page-redirects", PageRedirectRoute); // Make sure this line exists and is correct
@@ -1048,7 +1048,7 @@ app.use("/admin/area", AreaRoute);
 app.use("/admin", EmailSettingRoute);
 app.use("/admin/enquiries", EnquiryRoute);
 app.use("/admin/allowed-domains", AllowedDomainRoute);
-app.use("/admin/blogs", BlogRoute);
+// app.use("/admin/blogs", BlogRoute);
 app.use("/admin/client-access", ClientAccessRoute);
 app.use("/client-access", ClientAccessPublicRoute);
 
