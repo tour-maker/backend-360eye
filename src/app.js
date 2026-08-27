@@ -18,11 +18,6 @@ import SEORoute from "../src/routes/adminPanelRoutes/seoRoutes.js";
 import EmailSettingRoute from "./routes/adminPanelRoutes/emailSettingRoutes.js";
 import CategoryRoute from "../src/routes/adminPanelRoutes/categoryRoutes.js";
 import SliderRoute from "../src/routes/adminPanelRoutes/sliderRoutes.js";
-import PublicSliderRoute from "../src/routes/publicRoutes/publicSliderRoutes.js";
-import FilterRoute from "../src/routes/adminPanelRoutes/filterRoutes.js";
-// import CareerRoute from "../src/routes/adminPanelRoutes/careerRoutes.js";
-import PartnerRoute from "../src/routes/adminPanelRoutes/partnerRoutes.js";
-import PublicPartnerRoute from "../src/routes/publicRoutes/publicPartnerRoutes.js";
 import PageRedirectRoute from "../src/routes/adminPanelRoutes/redirectURLRoutes.js";
 import authRoutes from "./routes/adminPanelRoutes/authRoutes.js";
 import PropertyTypeRoute from "./routes/adminPanelRoutes/propertyTypeRoutes.js";
@@ -36,9 +31,6 @@ import EnquiryRoute from "./routes/adminPanelRoutes/enquiryRoutes.js";
 import { handleRedirect } from "./controllers/redirectURLController.js"; // Import the redirect handler
 import uploadRoutes from './routes/adminPanelRoutes/uploadRoutes.js';
 import AllowedDomainRoute from "./routes/adminPanelRoutes/allowedDomainRoutes.js";
-// import BlogRoute from "./routes/adminPanelRoutes/blogRoutes.js";
-import ClientAccessRoute from "./routes/adminPanelRoutes/clientAccessRoutes.js";
-import ClientAccessPublicRoute from "./routes/websiteRoutes/clientAccessPublicRoutes.js";
 import {
   verifyTourAccessToken,
   TOUR_ACCESS_COOKIE_NAME,
@@ -53,11 +45,6 @@ import {
 dotenv.config({ path: "./.env" });
 
 const app = express();
-app.use(cors({
-  origin: ["https://stageadminpanel.360eye.in", "https://stagewebsite.360eye.in", "http://localhost:3000", "http://localhost:5173"],
-  credentials: true,
-}));
-app.use(cookieParser());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,7 +140,7 @@ const applySecurityHeaders = (req, res, config) => {
   res.header("Access-Control-Allow-Methods", ALLOWED_METHODS);
   res.header("Access-Control-Allow-Credentials", "true");
   res.setHeader("Content-Security-Policy", config.frameAncestorsDirective);
-  if (config.xFrameOptionsValue) res.setHeader("X-Frame-Options", config.xFrameOptionsValue);
+  res.setHeader("X-Frame-Options", config.xFrameOptionsValue);
 };
 
 const securityConfigMiddleware = (req, res, next) => {
@@ -301,31 +288,14 @@ const serveCDNFile = async (req, res, cdnPath) => {
     ? `${baseUrl}${basePath}?${sanitizedQueryString}`
     : `${baseUrl}${basePath}`;
 
-  let externalCdnUrl = `${CDN_BASE_URL}/${cdnPath}`;
-  const stagingCdnUrl = `https://dl8mwi3fl0yp4.cloudfront.net/${cdnPath}`;
-  const productionCdnUrl = `https://d2t6r6l6h3adka.cloudfront.net/${cdnPath}`;
-
-  let resolvedCandidate = null;
-  for (const preCandidate of [stagingCdnUrl, productionCdnUrl]) {
-    try {
-      const preCheck = await axios.get(preCandidate, {
-        responseType: 'text', validateStatus: (s) => s < 500, timeout: 5000,
-      });
-      const preBody = String(preCheck.data || '');
-      const preIsStub = preBody.includes('http-equiv="refresh"') || preBody.length < 1000;
-      if (preCheck.status === 200 && !preIsStub) {
-        resolvedCandidate = preCandidate;
-        break;
-      }
-    } catch (e) {}
-  }
-  if (resolvedCandidate) {
-    externalCdnUrl = resolvedCandidate;
-  }
   const cdnUrl = sanitizedQueryString
-    ? `${baseUrl}/${cdnPath}?${sanitizedQueryString}`
-    : `${baseUrl}/${cdnPath}`;
+    ? `${CDN_BASE_URL}/${cdnPath}?${sanitizedQueryString}`
+    : `${CDN_BASE_URL}/${cdnPath}`;
 
+  const securityConfig = resolveSecurityConfig(req);
+  console.log(`[GALLERY ROUTE] Calling serveCDNFile with: ${cdnPath}`);
+  console.log(`[SECURITY CONFIG] frameAncestorsDirective: ${securityConfig?.frameAncestorsDirective}`);
+  applySecurityHeaders(req, res, securityConfig);
 
   let metaTitle = '360EYE – 360° Virtual Tour';
   let metaDescription = '';
@@ -362,13 +332,6 @@ const serveCDNFile = async (req, res, cdnPath) => {
   } catch (dbError) {
     console.error('Error fetching tour metadata:', dbError.message);
   }
-  const matchedTourId = matchedTour ? (matchedTour._id || matchedTour.id) : null;
-  const securityConfig = matchedTourId
-    ? await getSecurityConfigSnapshot(IS_DEVELOPMENT, matchedTourId)
-    : resolveSecurityConfig(req);
-  console.log(`[GALLERY ROUTE] Calling serveCDNFile with: ${cdnPath}`);
-  console.log(`[SECURITY CONFIG] frameAncestorsDirective: ${securityConfig?.frameAncestorsDirective}`);
-  applySecurityHeaders(req, res, securityConfig);
 
 
   if (matchedTour) {
@@ -546,10 +509,10 @@ ${analyticsSnippet}
       .overlay { padding: 28px 24px; }
       h1 { font-size: 1.6rem; }
     }
-    .tour-wrapper { position: fixed; inset: 0; background: #fff; }
+    .tour-wrapper { position: fixed; inset: 0; background: #000; }
     .tour-container { position: fixed; inset: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
     .tour-container.visible { opacity: 1; visibility: visible; }
-    .tour-frame { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    .tour-frame { width: 100%; height: 100%; border: 0; display: block; background: #000; }
   </style>
 </head>
 <body>
@@ -696,7 +659,7 @@ ${analyticsSnippet}
       res.status(200)
         .setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-      if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
+      res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.send(authHtml);
       return;
@@ -718,7 +681,7 @@ ${analyticsSnippet}
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #fff;
+      background: #000;
     }
     .tour-container {
       position: fixed;
@@ -738,7 +701,7 @@ ${analyticsSnippet}
   <div class="tour-container">
     <iframe
       class="tour-frame"
-      src="${externalCdnUrl}"
+      src="${cdnUrl}"
       title="${metaTitle}"
       allow="fullscreen; gyroscope; accelerometer; xr-spatial-tracking; camera; microphone"
       sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
@@ -767,7 +730,7 @@ ${analyticsSnippet}
       res.status(200);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Security-Policy', frameAncestorsDirective);
-      if (xFrameOptionsValue) res.setHeader("X-Frame-Options", xFrameOptionsValue);
+      res.setHeader('X-Frame-Options', xFrameOptionsValue);
       res.setHeader('Access-Control-Allow-Origin', '*');
 
       if (isCrawler) {
@@ -794,14 +757,23 @@ ${analyticsSnippet}
 
     if (isHtmlRequest) {
       try {
-        const found = !!resolvedCandidate;
+        const htmlResponse = await axios.get(cdnUrl, {
+          responseType: 'text',
+          validateStatus: (status) => status < 500,
+        });
 
-        if (found) {
+        if (htmlResponse.status === 200) {
           sendEmbeddedHtml();
           return;
         }
 
-        res.status(404).send(`File not found: ${cdnPath}`);
+        if (htmlResponse.status === 404) {
+          res.status(404).send(`File not found: ${cdnPath}`);
+          return;
+        }
+
+        console.warn(`Unexpected CDN status ${htmlResponse.status} for ${cdnPath}. Serving embedded iframe.`);
+        sendEmbeddedHtml();
         return;
       } catch (prefetchError) {
         if (!prefetchError.response) {
@@ -823,12 +795,12 @@ ${analyticsSnippet}
       }
     }
 
-    console.log(`[CDN REQUEST] Attempting to fetch: ${externalCdnUrl}`);
+    console.log(`[CDN REQUEST] Attempting to fetch: ${cdnUrl}`);
     
-    const response = await axios.get(externalCdnUrl, {
+    const response = await axios.get(cdnUrl, {
       responseType: 'stream',
       validateStatus: (status) => status < 500,
-      timeout: 8000, // reduced from 30s
+      timeout: 30000, // 30 second timeout
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -863,7 +835,7 @@ ${analyticsSnippet}
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-    if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
+    res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
 
     response.data.pipe(res);
     return;
@@ -926,7 +898,7 @@ app.use('/gallery/*', (req, res, next) => {
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Content-Security-Policy', securityConfig.frameAncestorsDirective);
-  if (securityConfig.xFrameOptionsValue) res.setHeader("X-Frame-Options", securityConfig.xFrameOptionsValue);
+  res.setHeader('X-Frame-Options', securityConfig.xFrameOptionsValue);
   res.status(403).send('Access to this resource is restricted.');
 });
 
@@ -1024,6 +996,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+app.use(cookieParser());
 
 // Routes
 app.use("/products", websiteProducts);
@@ -1036,11 +1009,6 @@ app.use("/admin/360-products", ThreeSixtyProductRoute);
 app.use("/admin/seo", SEORoute);
 app.use("/admin/categories", CategoryRoute);
 app.use("/admin/sliders", SliderRoute);
-app.use("/public/sliders", PublicSliderRoute);
-app.use("/admin/filters", FilterRoute);
-// app.use("/admin/careers", CareerRoute);
-app.use("/admin/partners", PartnerRoute);
-app.use("/public/partners", PublicPartnerRoute);
 app.use("/admin/page-redirects", PageRedirectRoute); // Make sure this line exists and is correct
 app.use("/admin/propertyTypes", PropertyTypeRoute);
 app.use("/admin/propertyStatus", PropertyStatusRoute);
@@ -1048,9 +1016,6 @@ app.use("/admin/area", AreaRoute);
 app.use("/admin", EmailSettingRoute);
 app.use("/admin/enquiries", EnquiryRoute);
 app.use("/admin/allowed-domains", AllowedDomainRoute);
-// app.use("/admin/blogs", BlogRoute);
-app.use("/admin/client-access", ClientAccessRoute);
-app.use("/client-access", ClientAccessPublicRoute);
 
 // This should be last to catch any remaining admin routes
 app.use("/admin", ImageRoute);
