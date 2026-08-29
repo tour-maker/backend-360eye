@@ -1,5 +1,6 @@
 import express from "express";
 import PublicSliderRoute from "./routes/publicRoutes/publicSliderRoutes.js";
+import FilterRoute from "./routes/adminPanelRoutes/filterRoutes.js";
 import dotenv from "dotenv";
 
 import axios from "axios";
@@ -46,7 +47,6 @@ import {
 dotenv.config({ path: "./.env" });
 
 const app = express();
-app.use("/public/sliders", PublicSliderRoute);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -185,6 +185,8 @@ const isAllowedOrigin = (req, config = resolveSecurityConfig(req)) => {
 };
 
 app.use(securityConfigMiddleware);
+app.use("/public/sliders", PublicSliderRoute);
+app.use("/admin/filters", FilterRoute);
 
 // Add diagnostic endpoint to check current security configuration
 app.get('/api/security-config', (req, res) => {
