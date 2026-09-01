@@ -1,4 +1,7 @@
 import express from "express";
+import ClientAccessRoute from "./routes/adminPanelRoutes/clientAccessRoutes.js";
+import ClientAccessPublicRoute from "./routes/websiteRoutes/clientAccessPublicRoutes.js";
+import CareerRoute from "./routes/adminPanelRoutes/careerRoutes.js";
 import PublicSliderRoute from "./routes/publicRoutes/publicSliderRoutes.js";
 import FilterRoute from "./routes/adminPanelRoutes/filterRoutes.js";
 import dotenv from "dotenv";
@@ -185,8 +188,13 @@ const isAllowedOrigin = (req, config = resolveSecurityConfig(req)) => {
 };
 
 app.use(securityConfigMiddleware);
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use("/public/sliders", PublicSliderRoute);
 app.use("/admin/filters", FilterRoute);
+app.use("/admin/client-access", ClientAccessRoute);
+app.use("/client-access", ClientAccessPublicRoute);
+app.use("/admin/careers", CareerRoute);
 
 // Add diagnostic endpoint to check current security configuration
 app.get('/api/security-config', (req, res) => {
@@ -953,8 +961,6 @@ app.use("/api", uploadRoutes);
 
 // Configure body parsers with appropriate limits for file uploads
 // Set reasonable limits that won't exceed your server capabilities
-app.use(express.json({ limit: "500mb" }));
-app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 
 // Special body parsing configuration for upload routes with increased limits
 app.use('/admin/albums/upload-zip', express.json({ limit: "4000mb" }));

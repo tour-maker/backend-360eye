@@ -45,7 +45,8 @@ export const submitApplication = async (req, res) => {
         let fileUrl = "";
         if (matchedFile && configured) {
           try {
-            const uploaded = await uploadFileToDrive(matchedFile.buffer, matchedFile.originalname, matchedFile.mimetype);
+            const folderType = /resume/i.test(ans.label) ? "resume" : "portfolio";
+            const uploaded = await uploadFileToDrive(matchedFile.buffer, matchedFile.originalname, matchedFile.mimetype, folderType);
             fileUrl = uploaded.webViewLink;
           } catch (uploadErr) {
             console.error("Drive upload failed:", uploadErr.message);
@@ -70,10 +71,26 @@ export const submitApplication = async (req, res) => {
 
     if (configured) {
       try {
+        const findAnswer = (pattern) => finalAnswers.find((a) => pattern.test(a.label));
+        const getVal = (pattern) => {
+          const a = findAnswer(pattern);
+          if (!a) return "";
+          return a.fieldType === "file" ? (a.fileUrl || "") : a.value;
+        };
         const row = [
           new Date().toISOString(),
-          role.title,
-          ...finalAnswers.map((a) => (a.fieldType === "file" ? (a.fileUrl || "") : a.value)),
+          getVal(/which profile/i),
+          getVal(/hear about/i),
+          getVal(/full name/i),
+          getVal(/contact number/i),
+          getVal(/email/i),
+          getVal(/work experience/i),
+          getVal(/joining duration/i),
+          getVal(/current salary/i),
+          getVal(/expected salary/i),
+          getVal(/portfolio url/i),
+          getVal(/upload portfolio/i),
+          getVal(/upload resume/i),
         ];
         await appendRowToSheet(row);
         application.syncedToSheet = true;
@@ -150,6 +167,7 @@ export const addRole = async (req, res) => {
     await role.save();
     res.status(201).json({ success: true, message: "Role created successfully", role });
   } catch (error) {
+    console.error("addRole error:", error);
     res.status(500).json({ success: false, message: "Error creating role" });
   }
 };
