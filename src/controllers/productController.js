@@ -123,6 +123,32 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+// Fire-and-forget notification to the Google Sheets automation webhook.
+// No-ops safely if SHEETS_WEBHOOK_URL isn't configured yet. Never throws,
+// never delays or blocks the actual API response.
+function notifySheetsWebhook(event, product) {
+  const url = process.env.SHEETS_WEBHOOK_URL;
+  if (!url) return;
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret: process.env.AUTOMATION_API_KEY,
+        event,
+        product: {
+          id: product._id.toString(),
+          tourName: product.tourName,
+          bhkType: product.bhkType || [],
+          filterTags: product.filterTags || {},
+        },
+      }),
+    }).catch((e) => console.error("Sheets webhook notify failed:", e.message));
+  } catch (e) {
+    console.error("Sheets webhook notify failed:", e.message);
+  }
+}
+
 // Create a new product with image upload
 const createProduct = async (req, res) => {
   try {
@@ -134,6 +160,7 @@ const createProduct = async (req, res) => {
         });
       }
 
+      try {
       const {
         
         categoryType,
@@ -151,7 +178,8 @@ const createProduct = async (req, res) => {
         bhkType: bhkTypeRaw,
         plotStatus = "",
         hasVoiceOver = false,
-        viewMode = "Day",
+        viewMode = "",
+        filterTags: filterTagsRaw,
       } = req.body;
 
       if (
@@ -195,6 +223,14 @@ const createProduct = async (req, res) => {
         bhkType = bhkTypeRaw ? [bhkTypeRaw] : [];
       }
 
+      let filterTags = {};
+      try {
+        const parsedTags = typeof filterTagsRaw === "string" ? JSON.parse(filterTagsRaw) : filterTagsRaw;
+        filterTags = (parsedTags && typeof parsedTags === "object") ? parsedTags : {};
+      } catch {
+        filterTags = {};
+      }
+
       const newProduct = new Product({
        
         categoryType,
@@ -213,15 +249,31 @@ const createProduct = async (req, res) => {
         plotStatus,
         hasVoiceOver: hasVoiceOver === "true" || hasVoiceOver === true,
         viewMode,
+        filterTags,
         thumbImage: req.file ? `/uploads/products/${req.file.filename}` : "",
       });
 
       await newProduct.save();
+      notifySheetsWebhook("productCreated", newProduct);
       res.status(201).json({
         success: true,
         message: "Product created successfully",
         product: newProduct,
       });
+      } catch (innerError) {
+        console.error("Error creating product:", innerError);
+        const validationErrors = innerError.errors
+          ? Object.keys(innerError.errors).reduce((acc, k) => {
+              acc[k] = innerError.errors[k].message;
+              return acc;
+            }, {})
+          : undefined;
+        res.status(400).json({
+          success: false,
+          message: innerError.message || "Error creating product",
+          errors: validationErrors,
+        });
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -243,6 +295,7 @@ const updateProduct = async (req, res) => {
         });
       }
 
+      try {
       const { id } = req.params; // Get the product ID from the URL params
       const updateData = req.body; // Get the updated data from the request body
       if (updateData.hasVoiceOver !== undefined) {
@@ -255,6 +308,15 @@ const updateProduct = async (req, res) => {
           updateData.bhkType = Array.isArray(parsed) ? parsed.filter(Boolean) : (parsed ? [parsed] : []);
         } catch {
           updateData.bhkType = updateData.bhkType ? [updateData.bhkType] : [];
+        }
+      }
+
+      if (updateData.filterTags !== undefined) {
+        try {
+          const parsedTags = typeof updateData.filterTags === "string" ? JSON.parse(updateData.filterTags) : updateData.filterTags;
+          updateData.filterTags = (parsedTags && typeof parsedTags === "object") ? parsedTags : {};
+        } catch {
+          updateData.filterTags = {};
         }
       }
 
@@ -308,6 +370,20 @@ const updateProduct = async (req, res) => {
         message: "Product updated successfully",
         product,
       });
+      } catch (innerError) {
+        console.error("Error updating product:", innerError);
+        const validationErrors = innerError.errors
+          ? Object.keys(innerError.errors).reduce((acc, k) => {
+              acc[k] = innerError.errors[k].message;
+              return acc;
+            }, {})
+          : undefined;
+        res.status(400).json({
+          success: false,
+          message: innerError.message || "Error updating product",
+          errors: validationErrors,
+        });
+      }
     });
   } catch (error) {
     res.status(500).json({

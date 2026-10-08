@@ -80,7 +80,6 @@ const ProductSchema = new mongoose.Schema(
     },
     bhkType: {
       type: [String],
-      enum: ["2 BHK", "3 BHK", "3.5 BHK", "4 BHK", "5 BHK"],
       default: [],
     },
     plotStatus: {
@@ -88,14 +87,18 @@ const ProductSchema = new mongoose.Schema(
       enum: ["", "Available", "Reserved", "Sold"],
       default: "",
     },
+    filterTags: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     hasVoiceOver: {
       type: Boolean,
       default: false,
     },
     viewMode: {
       type: String,
-      enum: ["Day", "Night", "Both"],
-      default: "Day",
+      enum: ["Day", "Night", "Both", ""],
+      default: "",
     },
   },
   { timestamps: true, collection: "products" }

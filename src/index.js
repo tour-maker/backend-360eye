@@ -1,3 +1,10 @@
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection (server stayed up):", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception (server stayed up):", err);
+});
 import dotenv from "dotenv";
 import app from "./app.js";
 import connectDB from "./db/index.js";

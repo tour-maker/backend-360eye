@@ -4,6 +4,8 @@ import ClientAccessPublicRoute from "./routes/websiteRoutes/clientAccessPublicRo
 import CareerRoute from "./routes/adminPanelRoutes/careerRoutes.js";
 import PublicSliderRoute from "./routes/publicRoutes/publicSliderRoutes.js";
 import FilterRoute from "./routes/adminPanelRoutes/filterRoutes.js";
+import LegacyFilterConfigRoute from "./routes/adminPanelRoutes/legacyFilterConfigRoutes.js";
+import AutomationRoute from "./routes/adminPanelRoutes/automationRoutes.js";
 import dotenv from "dotenv";
 
 import axios from "axios";
@@ -192,6 +194,8 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use("/public/sliders", PublicSliderRoute);
 app.use("/admin/filters", FilterRoute);
+app.use("/admin/legacy-filters", LegacyFilterConfigRoute);
+app.use("/admin/automation", AutomationRoute);
 app.use("/admin/client-access", ClientAccessRoute);
 app.use("/client-access", ClientAccessPublicRoute);
 app.use("/admin/careers", CareerRoute);
