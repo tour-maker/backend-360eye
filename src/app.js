@@ -327,6 +327,7 @@ const serveCDNFile = async (req, res, cdnPath) => {
   };
 
   let matchedTour = null;
+  let isHiddenTour = false;
   try {
     const Product = (await import('./models/productModel.js')).default;
     const Product360 = (await import('./models/product360Model.js')).default;
@@ -345,12 +346,29 @@ const serveCDNFile = async (req, res, cdnPath) => {
         productStatus: 'Yes'
       });
     }
+
+    // Hidden tours (productStatus 'No') must still be found so their password
+    // gate runs. They keep the generic link preview (no title/image leak).
+    if (!matchedTour) {
+      matchedTour = await Product.findOne({
+        tourURL: { $regex: searchPath, $options: 'i' },
+        categoryType: 'Virtual Tour',
+        productStatus: 'No'
+      });
+      if (!matchedTour) {
+        matchedTour = await Product360.findOne({
+          virtualTourLink: { $regex: searchPath, $options: 'i' },
+          productStatus: 'No'
+        });
+      }
+      if (matchedTour) isHiddenTour = true;
+    }
   } catch (dbError) {
     console.error('Error fetching tour metadata:', dbError.message);
   }
 
 
-  if (matchedTour) {
+  if (matchedTour && !isHiddenTour) {
     const tourTitle = matchedTour.urlName || matchedTour.tourName || matchedTour.name || '';
 
     if (tourTitle) {
@@ -486,7 +504,7 @@ ${twitterDescriptionMetaTag}  <meta name="twitter:image" content="${escapedMetaI
     }
 
     if (!isAuthorized) {
-      const tourTitle = matchedTour.tourName || matchedTour.name || '360° Virtual Tour';
+      const tourTitle = isHiddenTour ? '360° Virtual Tour' : (matchedTour.tourName || matchedTour.name || '360° Virtual Tour');
       const verifyEndpoint = `/products/${expectedTourId}/verify-password`;
       const authHtml = `<!DOCTYPE html>
 <html lang="en">
